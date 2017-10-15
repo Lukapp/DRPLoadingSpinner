@@ -15,6 +15,7 @@
 @property (strong) DRPLoadingSpinner *loadingSpinner;
 @property (weak) UITableViewController *tableViewController;
 @property BOOL awaitingRefreshEnd;
+@property (nonatomic, strong) UILabel *title;
 
 @end
 
@@ -23,12 +24,35 @@
 - (instancetype)init {
     if (self = [super init]) {
         self.loadingSpinner = [[DRPLoadingSpinner alloc] init];
+        self.loadingSpinner.translatesAutoresizingMaskIntoConstraints = NO;
 
         self.refreshControl = [[UIRefreshControl alloc] init];
         [self.refreshControl addTarget:self action:@selector(refreshControlTriggered:) forControlEvents:UIControlEventValueChanged];
         [self.refreshControl addSubview:self.loadingSpinner];
+        self.yOffset = -self.refreshControl.frame.size.height;
+        
+        [[NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.refreshControl attribute:NSLayoutAttributeCenterX multiplier:1 constant:0] setActive:YES];
+        [[NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.refreshControl attribute:NSLayoutAttributeCenterY multiplier:1 constant:-5] setActive:YES];
+        [[NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:self.loadingSpinner.frame.size.width] setActive:YES];
+        [[NSLayoutConstraint constraintWithItem:self.loadingSpinner attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1 constant:self.loadingSpinner.frame.size.height] setActive:YES];
     }
 
+    return self;
+}
+
+- (instancetype)initWithAttributedTitle:(NSAttributedString *) attributedTitle {
+    if (self = [self init]) {
+        self.attributedTitle = attributedTitle;
+        
+        _title = [[UILabel alloc] init];
+        _title.attributedText = self.attributedTitle;
+        _title.translatesAutoresizingMaskIntoConstraints = NO;
+        [self.refreshControl addSubview:_title];
+        
+        [[NSLayoutConstraint constraintWithItem:_title attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.loadingSpinner attribute:NSLayoutAttributeCenterX multiplier:1 constant:0] setActive:YES];
+        [[NSLayoutConstraint constraintWithItem:self.refreshControl attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.title attribute:NSLayoutAttributeBottom multiplier:1 constant:5] setActive:YES];
+        [[NSLayoutConstraint constraintWithItem:_title attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.loadingSpinner attribute:NSLayoutAttributeBottom multiplier:1 constant:5] setActive:YES];
+    }
     return self;
 }
 
@@ -173,22 +197,16 @@
     }
 
     if (!self.refreshControl.isRefreshing) {
+        self.tableViewController.tableView.contentOffset = scrollView.contentOffset;
         self.awaitingRefreshEnd = NO;
+    }else{
+        [self.tableViewController.tableView setContentOffset:CGPointMake(0, _yOffset) animated:YES];
     }
 }
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     if ([self.originalDelegate respondsToSelector:@selector(scrollViewDidScroll:)]) {
         [self.originalDelegate scrollViewDidScroll:scrollView];
-    }
-
-    if (!self.refreshControl.hidden) {
-        self.loadingSpinner.frame = CGRectMake(
-            (self.refreshControl.frame.size.width - self.loadingSpinner.frame.size.width) / 2,
-            (self.refreshControl.frame.size.height - self.loadingSpinner.frame.size.height) / 2,
-            self.loadingSpinner.frame.size.width,
-            self.loadingSpinner.frame.size.height
-        );
     }
 
     if (!self.awaitingRefreshEnd) {

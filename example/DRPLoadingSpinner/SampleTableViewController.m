@@ -24,9 +24,16 @@ NSString * const ReuseIdentifier = @"ReuseIdentifier";
     
     __weak SampleTableViewController *weakSelf = self;
     [self.tableView registerClass:[UITableViewCell class] forCellReuseIdentifier:ReuseIdentifier];
-    self.drpRefreshControl = [[DRPRefreshControl alloc] init];
     
-//    [self.drpRefreshControl addToTableViewController:self target:self selector:@selector(refreshTriggered)];
+    UIColor *darkGray = [UIColor darkGrayColor];
+    CGFloat size = 10;
+    UIFont *font = [UIFont fontWithName:@"Helvetica-Light" size:size];
+    NSAttributedString *attributedTitle = [[NSAttributedString alloc] initWithString:@"Testing..." attributes:[NSDictionary dictionaryWithObjectsAndKeys:darkGray, NSForegroundColorAttributeName, font, NSFontAttributeName, nil]];
+    
+    self.drpRefreshControl = [[DRPRefreshControl alloc] initWithAttributedTitle:attributedTitle];
+//    self.drpRefreshControl.yOffset = -200;
+    
+    [self.drpRefreshControl addToTableViewController:self target:self selector:@selector(refreshTriggered)];
 
 //    [self.drpRefreshControl addToTableViewController:self refreshBlock:^{
 //        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -34,7 +41,7 @@ NSString * const ReuseIdentifier = @"ReuseIdentifier";
 //        });
 //    }];
 
-    [self.drpRefreshControl addToScrollView:self.tableView target:self selector:@selector(refreshTriggered)];
+//    [self.drpRefreshControl addToScrollView:self.tableView target:self selector:@selector(refreshTriggered)];
 
 //    [self.drpRefreshControl addToScrollView:self.tableView refreshBlock:^{
 //        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{

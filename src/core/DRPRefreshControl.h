@@ -18,6 +18,11 @@
  */
 @property (readonly) DRPLoadingSpinner *loadingSpinner;
 
+@property (nonatomic) CGFloat yOffset;
+@property (nonatomic, strong) NSAttributedString *attributedTitle;
+
+- (instancetype)initWithAttributedTitle:(NSAttributedString *) attributedTitle;
+
 /**
  *  @brief Adds the refresh control to the associated table view controller.
  *  @param tableViewController The table view controller to attach the refresh control to.
